@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### KEY ###
+**/src/main/resources/application-key.yml

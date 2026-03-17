@@ -1,5 +1,8 @@
-discord:
-  token: MTQ4Mjk4ODg3Mzk3NjkwOTkzNw.GHtQdP.i0xRuDD3C_i3MdC_v__kK00aDJWyPi-1GnTlwU
+spring:
+  config:
+    import: "classpath:application-key.yml"
+
+
 
 mc:
   server:
