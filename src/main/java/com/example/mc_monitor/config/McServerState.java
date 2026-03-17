@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-@Getter
 @Setter
 @Component
 public class McServerState {
@@ -21,6 +20,10 @@ public class McServerState {
 
     public void setState(McServerStatus newStatus) {
         status = newStatus;
+    }
+
+    public void initState() {
+        status = new McServerStatus();
     }
 
 }
