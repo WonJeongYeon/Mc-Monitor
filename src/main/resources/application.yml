@@ -1,13 +1,13 @@
 spring:
   config:
-    import: "classpath:application-key.yml"
+    import: "classpath:application-keys.yml"
 
 
 
 mc:
   server:
-#    ip: 114.129.70.216
-    ip: 127.0.0.1
+    ip: 114.129.70.216
+#    ip: 127.0.0.1
     port: 9000
 
 scheduler:
