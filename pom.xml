@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.example</groupId>
     <artifactId>mc_monitor</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>mc_monitor</name>
     <description>mc_monitor</description>
     <url/>
@@ -54,6 +54,12 @@
             <version>5.0.0-beta.20</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!--WebFlux-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -72,6 +78,27 @@
             <artifactId>r2dbc-mariadb</artifactId>
             <version>1.1.4</version>
         </dependency>
+
+        <!-- RabbitMQ -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+        <!-- RabbitMQ-Reactive -->
+<!--        <dependency>-->
+<!--            <groupId>io.projectreactor.rabbitmq</groupId>-->
+<!--            <artifactId>reactor-rabbitmq</artifactId>-->
+<!--            <version>1.5.6</version>-->
+<!--        </dependency>-->
+
+        <!-- gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+
 
     </dependencies>
 

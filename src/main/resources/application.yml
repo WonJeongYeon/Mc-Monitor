@@ -13,3 +13,6 @@ mc:
 scheduler:
   delay:
     fetchServerStatus: 30000
+
+logger:
+  qos: 10
