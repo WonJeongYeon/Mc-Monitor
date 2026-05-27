@@ -1,5 +1,6 @@
 package com.example.mc_monitor.entity;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,11 +15,12 @@ import org.springframework.data.relational.core.mapping.Table;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("user")
-public class User {
+@Table("audit")
+public class Audit {
 
     private int id;
     private String uuid;
-    private String userId;
-    private String createTime;
+    private String name;
+    private String type;
+    private LocalDateTime createdAt;
 }
