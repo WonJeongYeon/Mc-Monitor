@@ -1,17 +1,15 @@
 package com.example.mc_monitor.consumer;
 
-import com.example.mc_monitor.entity.User;
 import com.example.mc_monitor.model.ServerJoinEvent;
+import com.example.mc_monitor.module.PlayerManager;
 import com.google.gson.Gson;
-import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
@@ -22,11 +20,12 @@ public class PlayerJoinConsumer {
     private final String MODULE_NAME = "[PlayerJoinConsumer] ";
     private final Gson gson = new Gson();
 
+    private final PlayerManager playerManager;
     private final CachingConnectionFactory connectionFactory;
 
     @RabbitListener(queues = QUEUE_NAME, containerFactory = "rabbitListenerContainerFactory",
-            batch = "true",
-            concurrency = "1"
+        batch = "true",
+        concurrency = "1"
     )
     public void receiveMessages(final Message message) {
         String str = convertBytesToString(message.getBody());
@@ -34,6 +33,9 @@ public class PlayerJoinConsumer {
 
         ServerJoinEvent serverJoinEvent = gson.fromJson(str, ServerJoinEvent.class);
         log.info(MODULE_NAME + "Parsing Data : {}", serverJoinEvent);
+
+        playerManager.processEvent(serverJoinEvent).subscribe();
+        log.info(MODULE_NAME + "Try to save data : {}", serverJoinEvent);
     }
 
     private String convertBytesToString(byte[] bytes) {
