@@ -17,34 +17,22 @@ public class CommandManager {
         );
     }
 
-    public void handle(
-            SlashCommandInteractionEvent event
-    ) {
-
+    public void handle(SlashCommandInteractionEvent event) {
         CommandType type =
                 CommandType.from(event.getName());
-
         if (type == null) {
-
             event.reply("알 수 없는 명령어")
                     .setEphemeral(true)
                     .queue();
-
             return;
         }
-
-        Command command =
-                commands.get(type);
-
+        Command command = commands.get(type);
         if (command == null) {
-
             event.reply("구현되지 않은 명령어")
                     .setEphemeral(true)
                     .queue();
-
             return;
         }
-
         command.execute(event);
     }
 }

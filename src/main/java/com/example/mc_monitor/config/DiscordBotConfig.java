@@ -8,6 +8,7 @@ import com.example.mc_monitor.model.McServerStatus;
 
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 
@@ -22,18 +23,17 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class DiscordBotConfig {
 
     @Value("${discord.token}")
     private String token;
 
-    private final McServerState state;
-
     @Bean
-    public CommandManager commandManager(
+    public CommandManager commandManager( //명령어 목록 초기화
             List<Command> commands
     ) {
-
+        log.info("[DiscordBotConfig] Initializing CommandManager...");
         CommandManager manager =
                 new CommandManager();
 
@@ -41,21 +41,22 @@ public class DiscordBotConfig {
 
         return manager;
     }
+
     @Bean
-    public SlashCommandListener slashCommandListener(
+    public SlashCommandListener slashCommandListener( //명령어 리스너 초기화
             CommandManager commandManager
     ) {
-
+        log.info("[DiscordBotConfig] Initializing SlashCommandManager...");
         return new SlashCommandListener(
                 commandManager
         );
     }
 
     @Bean
-    public JDA jda(
+    public JDA jda( //BOT 최종 초기화
             SlashCommandListener listener
     ) throws Exception {
-
+        log.info("[DiscordBotConfig] Initializing JDA...");
         JDA jda = JDABuilder.createDefault(token)
                 .addEventListeners(listener)
                 .build()
