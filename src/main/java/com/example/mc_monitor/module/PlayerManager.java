@@ -1,6 +1,10 @@
 package com.example.mc_monitor.module;
 
+import com.example.mc_monitor.model.BaseEvent;
+import com.example.mc_monitor.model.enums.EventType;
+import com.example.mc_monitor.module.handler.EventHandler;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,20 +17,20 @@ import reactor.core.publisher.Mono;
 public class PlayerManager {
 
     private final String MODULE_NAME = "[PlayerManager] ";
-    private final List<EventHandler<?, ?>> eventHandlers;
+    private final Map<EventType, List<EventHandler>> eventHandlers;
 
-    public Mono<?> processEvent(Object event) {
-        return Flux.fromIterable(eventHandlers)
-            .filter(handler -> handler.support(event))
-            .flatMap(handler -> {
-                EventHandler<Object, ?> targetHandler = (EventHandler<Object, ?>) handler;
-                return targetHandler.handle(event)
-                    .onErrorResume(e -> {
-                        log.error(MODULE_NAME + "Failed to execute handler {}: {}",
-                            handler.getClass().getSimpleName(), e.getMessage());
-                        return Mono.empty();
-                    });
-            })
+    public Mono<Void> processEvent(BaseEvent event) {
+        if (event == null) {
+            return null;
+        }
+
+        return Flux.fromIterable(eventHandlers.get(event.getType()))
+            .flatMap(handler -> handler.handle(event)
+                .onErrorResume(e -> {
+                    log.error(MODULE_NAME + "Failed to execute handler {}: {}",
+                        handler.getClass().getSimpleName(), e.getMessage());
+                    return Mono.empty();
+                }))
             .then();
     }
 }

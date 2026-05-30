@@ -1,6 +1,7 @@
 package com.example.mc_monitor.consumer;
 
-import com.example.mc_monitor.model.ServerJoinEvent;
+import com.example.mc_monitor.model.BaseEvent;
+import com.example.mc_monitor.model.enums.EventType;
 import com.example.mc_monitor.module.PlayerManager;
 import com.google.gson.Gson;
 import java.nio.charset.StandardCharsets;
@@ -28,14 +29,13 @@ public class PlayerJoinConsumer {
         concurrency = "1"
     )
     public void receiveMessages(final Message message) {
-        String str = convertBytesToString(message.getBody());
-        log.info(MODULE_NAME + "Consume : {}", str);
+        String body = convertBytesToString(message.getBody());
+        log.info(MODULE_NAME + "Consume : {}", body);
 
-        ServerJoinEvent serverJoinEvent = gson.fromJson(str, ServerJoinEvent.class);
-        log.info(MODULE_NAME + "Parsing Data : {}", serverJoinEvent);
+        BaseEvent event = BaseEvent.of(EventType.PLAYER_JOIN_EVENT, body);
 
-        playerManager.processEvent(serverJoinEvent).subscribe();
-        log.info(MODULE_NAME + "Try to save data : {}", serverJoinEvent);
+        playerManager.processEvent(event).subscribe();
+        log.info(MODULE_NAME + "Try to save data : {}", event);
     }
 
     private String convertBytesToString(byte[] bytes) {

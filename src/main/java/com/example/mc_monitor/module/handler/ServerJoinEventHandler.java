@@ -1,8 +1,10 @@
-package com.example.mc_monitor.module;
+package com.example.mc_monitor.module.handler;
 
 import com.example.mc_monitor.entity.Audit;
 import com.example.mc_monitor.entity.User;
-import com.example.mc_monitor.model.ServerJoinEvent;
+import com.example.mc_monitor.model.BaseEvent;
+import com.example.mc_monitor.model.enums.EventType;
+import com.example.mc_monitor.module.UtilManager;
 import com.example.mc_monitor.repository.AuditRepository;
 import com.example.mc_monitor.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ServerJoinEventHandler implements EventHandler<ServerJoinEvent, Void> {
+public class ServerJoinEventHandler implements EventHandler {
 
     private final String MODULE_NAME = "[ServerJoinEventHandler] ";
 
@@ -21,12 +23,12 @@ public class ServerJoinEventHandler implements EventHandler<ServerJoinEvent, Voi
     private final AuditRepository auditRepository;
 
     @Override
-    public boolean support(Object event) {
-        return event instanceof ServerJoinEvent;
+    public EventType getEventType() {
+        return EventType.PLAYER_JOIN_EVENT;
     }
 
     @Override
-    public Mono<Void> handle(ServerJoinEvent event) {
+    public Mono<Void> handle(BaseEvent event) {
         return Mono.just(event)
             .flatMap(this::validateServerJoinEvent)
             .doOnNext(e -> log.info(MODULE_NAME + "Successfully validated event : {}", e))
@@ -35,12 +37,13 @@ public class ServerJoinEventHandler implements EventHandler<ServerJoinEvent, Voi
             .doOnSuccess(savedAudit -> log.info(MODULE_NAME + "Successfully saved audit log : {}",
                 savedAudit))
             .doOnError(
-                e -> log.error(MODULE_NAME + "Failed to save audit log for {}: {}", event.getName(),
+                e -> log.error(MODULE_NAME + "Failed to save audit log for {}: {}",
+                    event.getEventName(),
                     e.getMessage()))
             .then();
     }
 
-    private Mono<ServerJoinEvent> validateServerJoinEvent(ServerJoinEvent event) {
+    private Mono<BaseEvent> validateServerJoinEvent(BaseEvent event) {
         if (event.getUuid() == null || event.getUuid().isBlank()) {
             return Mono.error(
                 new IllegalArgumentException(MODULE_NAME + "UUID is null : " + event));
@@ -49,33 +52,31 @@ public class ServerJoinEventHandler implements EventHandler<ServerJoinEvent, Voi
         return userRepository.findByUuid(event.getUuid())
             .doOnNext(user -> log.info(MODULE_NAME + "Existing user joined : {}", user))
             .switchIfEmpty(Mono.defer(() -> {
-                log.info(MODULE_NAME + "New user detected, creating : {}", event.getName());
+                log.info(MODULE_NAME + "New user detected, creating : {}", event.getEventName());
                 return userRepository.save(toUser(event))
                     .doOnSuccess(
                         user -> log.info(MODULE_NAME + "Successfully created user : {}", user))
                     .doOnError(
                         e -> log.error(MODULE_NAME + "Failed to create user : {} - Reason : {}",
-                            event.getName(), e.getMessage()));
+                            event.getEventName(), e.getMessage()));
             }))
             .thenReturn(event);
     }
 
-    private User toUser(ServerJoinEvent event) {
-        User newUser = User.builder()
-            .uuid(event.getUuid())
-            .userId(event.getName())
+    private User toUser(BaseEvent event) {
+        return User.builder()
+            .uuid((String) event.resolveValueFromPayload(String.class, "uuid"))
+            .userId((String) event.resolveValueFromPayload(String.class, "userId"))
             .createTime(UtilManager.now())
             .build();
-
-        return newUser;
     }
 
-    private Audit toAudit(ServerJoinEvent serverJoinEvent) {
+    private Audit toAudit(BaseEvent event) {
         return Audit.builder()
-            .uuid(serverJoinEvent.getUuid())
-            .name(serverJoinEvent.getName())
-            .type(serverJoinEvent.getType())
-            .createdAt(UtilManager.convertStringToLocalDateTime(serverJoinEvent.getTime()))
+            .uuid((String) event.resolveValueFromPayload(String.class, "uuid"))
+            .name((String) event.resolveValueFromPayload(String.class, "name"))
+            .type(event.getEventName())
+            .createdAt(UtilManager.convertStringToLocalDateTime(event.getCreatedAt()))
             .build();
     }
 }
