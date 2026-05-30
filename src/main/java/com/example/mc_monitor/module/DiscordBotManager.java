@@ -1,14 +1,25 @@
 package com.example.mc_monitor.module;
 
 import com.example.mc_monitor.config.McServerState;
+import com.example.mc_monitor.discord.command.CommandManager;
+import com.example.mc_monitor.discord.command.CommandType;
+import com.example.mc_monitor.discord.command.impl.ServerCommand;
 import com.example.mc_monitor.model.McServerStatus;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -50,5 +61,22 @@ public class DiscordBotManager {
 
     public void updateStatus(String message) {
         jda.getPresence().setActivity(Activity.watching(message));
+    }
+
+    private void registerCommands() {
+
+        List<SlashCommandData> commands =
+                Arrays.stream(CommandType.values())
+                        .map(type ->
+                                Commands.slash(
+                                        type.getName(),
+                                        type.getDescription()
+                                )
+                        )
+                        .toList();
+
+        jda.updateCommands()
+                .addCommands(commands)
+                .queue();
     }
 }
